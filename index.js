@@ -1,5 +1,5 @@
 const express = require('express');
-const { EdgeTTS } = require('@ms-edge-tts/node');
+const { EdgeTTS } = require('microsoft-edge-tts');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -9,8 +9,8 @@ app.get('/tts', async (req, res) => {
 
     try {
         const tts = new EdgeTTS();
-        // सिधै नेपाली सागर भ्वाइसमा कन्भर्ट गर्ने
-        const buffer = await tts.getAudio(text, "ne-NP-SagarNeural");
+        // नेपाली आवाज सेट गर्दै
+        const buffer = await tts.toBuffer(text, "ne-NP-SagarNeural");
         
         res.set('Content-Type', 'audio/mpeg');
         res.send(buffer);
@@ -20,6 +20,6 @@ app.get('/tts', async (req, res) => {
     }
 });
 
-app.get('/', (req, res) => res.send("API is Live!"));
+app.get('/', (req, res) => res.send("API is Live! Use /tts?text=नमस्ते"));
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
