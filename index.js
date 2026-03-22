@@ -1,5 +1,5 @@
 const express = require('express');
-const { EdgeTTS } = require('edge-tts');
+const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -8,15 +8,16 @@ app.get('/tts', async (req, res) => {
     if (!text) return res.status(400).send("Text is required");
 
     try {
-        const tts = new EdgeTTS();
-        // नेपाली आवाज (Sagar) सेट गर्दै
-        await tts.ttsPromise(text, 'ne-NP-SagarNeural');
+        const tts = new MsEdgeTTS();
+        await tts.setMetadata("ne-NP-SagarNeural", OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
         
-        // यसले सिधै अडियो फाइल पठाउँछ
+        // यसले अडियो डाटा स्ट्रिम गर्छ
+        const readable = await tts.toStream(text);
+        
         res.set('Content-Type', 'audio/mpeg');
-        res.send(tts.audioData);
+        readable.pipe(res);
     } catch (error) {
-        res.status(500).send("Error: " + error.message);
+        res.status(500).send("Error generating audio: " + error.message);
     }
 });
 
